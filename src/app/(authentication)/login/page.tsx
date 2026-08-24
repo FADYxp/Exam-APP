@@ -25,7 +25,7 @@ export default function Login() {
   //FORM
   const form = useForm<LoginFields>({
     defaultValues: {
-      email: "",
+      username: "",
       password: "",
     },
     resolver: zodResolver(LoginSchema),
@@ -36,7 +36,7 @@ export default function Login() {
       onError: () => {
 
         form.setError("root", {
-          message: "Invalid Email or Password",
+          message: "Invalid username or Password",
         });
       },
     });
@@ -49,17 +49,17 @@ export default function Login() {
         </div>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
-            {/* EMAIL */}
+            {/* UserName */}
             <FormField
               control={form.control}
-              name="email"
+              name="username"
               render={({ field }) => (
                 <FormItem className="mb-4">
-                  <FormLabel>Email</FormLabel>
+                  <FormLabel>Username</FormLabel>
                   <FormControl>
                     <Input
-                      type="email"
-                      placeholder="user@example.com"
+                      
+                      placeholder="userName"
                       {...field}
                     />
                   </FormControl>

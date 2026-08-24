@@ -2,13 +2,12 @@
 
 import { Button } from "@/components/ui/button";
 import useGetQuestions from "@/hooks/use-get-questions";
-import { SavedAnswersType } from "@/lib/types/exams";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import ExamTimer from "@/app/(dashboard)/_components/exam-timer";
 import { ExamSubmitRequest } from "@/lib/types/answers-submit";
-import { useSubmitAnswers } from "@/hooks/use-submit-answers";
+import { useSubmitExamAnswers } from "@/app/(dashboard)/exams/_hooks/use-submit-exam-answers";
 import ProgressBar from "@/app/(dashboard)/_components/exam-progress-bar";
 import Loader from "@/components/shared/loader";
 import Review from "../exams/_components/review";
@@ -18,56 +17,43 @@ import Review from "../exams/_components/review";
 // Questions Component
 export default function QuestionsComponent() {
   const [questionIndex, setQuestionIndex] = useState(0);
-  const [savedAnswers, setSavedAnswers] = useState<SavedAnswersType>({});
+  const [startedAt, setStartedAt] = useState<string>("");
   // form
   const { register, watch, setValue, getValues } = useForm({});
 
   //  Search Params
   const searchParams = useSearchParams();
-  const id = searchParams.get("id");
+  const examId = searchParams.get("id");
 
   // mutations
   // Exam Questions Function
-  const { data, isLoading } = useGetQuestions(id!);
-  const { submitAnswers, submitPending, submitData } = useSubmitAnswers();
+  const { data, isLoading } = useGetQuestions(examId!);
+  const { submitExamAnswers, submitPending, submitData } = useSubmitExamAnswers();
+
+  // Initialize startedAt on component mount
+  useEffect(() => {
+    if (!startedAt) {
+      setStartedAt(new Date().toISOString());
+    }
+  }, [startedAt]);
 
   // Variables
   const currentQuestion = useMemo(() => {
-    return data?.questions[questionIndex];
+    return data?.payload?.questions[questionIndex];
   }, [data, questionIndex]);
 
-  const totalQuestions = data?.questions.length ?? 0;
+  const totalQuestions = data?.payload?.questions.length ?? 0;
   const formValues = watch();
 
   // useEffect to set default answer for current question
   useEffect(() => {
     if (currentQuestion) {
-      const firstAnswerKey = currentQuestion.answers[0].key;
-      if (!formValues[currentQuestion._id]) {
-        setValue(currentQuestion._id, firstAnswerKey);
+      const firstAnswerKey = currentQuestion.answers[0].id;
+      if (!formValues[currentQuestion.id]) {
+        setValue(currentQuestion.id, firstAnswerKey);
       }
     }
   }, [questionIndex, currentQuestion, formValues, setValue]);
-
-  // Saves answers on question change {UseMemo}
-  useMemo(() => {
-    if (!currentQuestion) return;
-
-    const questionId = currentQuestion._id;
-    setSavedAnswers((prev) => {
-      if (prev[questionId]) return prev;
-
-      const answersObj: { [key: string]: string } = {};
-      currentQuestion.answers.forEach((answer) => {
-        answersObj[answer.key] = answer.answer;
-      });
-
-      return {
-        ...prev,
-        [questionId]: { answers: answersObj },
-      };
-    });
-  }, [currentQuestion]);
 
   // FUNCTIONS
   // Handle Next Question
@@ -84,20 +70,25 @@ export default function QuestionsComponent() {
   };
 
   //Sorting answers Function
-  const sortAnswers = () => {
+  const sortAnswers = (): ExamSubmitRequest => {
     const answers = Object.entries(getValues()).map(
-      ([questionId, correct]) => ({
+      ([questionId, answerId]) => ({
         questionId,
-        correct: String(correct),
+        answerId: String(answerId),
       })
     );
-    return { answers };
+    return {
+      examId: examId!,
+      answers,
+      startedAt,
+    };
   };
 
   // Handle submit Answers
   const handleSubmit = () => {
-    const answers: ExamSubmitRequest = sortAnswers();
-    submitAnswers(answers);
+    const submissionData = sortAnswers();
+    console.log(submissionData)
+    submitExamAnswers(submissionData);
   };
 
   //   Rendering
@@ -114,27 +105,27 @@ export default function QuestionsComponent() {
       <ProgressBar current={questionIndex + 1} total={totalQuestions} />
       {submitData ? (
         // results review component
-        <Review submitData={submitData} savedAnswers={savedAnswers} />
+        <Review submitData={submitData} />
       ) : (
         <>
           <h2 className="font-semibold text-2xl mt-10 mb-4 text-blue-600 ">
-            {currentQuestion?.question}
+            {currentQuestion?.text}
           </h2>
           {currentQuestion?.answers.map((answer) => (
             <div
-              key={answer.key}
+              key={answer.id}
               className="w-full bg-gray-50 hover:bg-gray-100 mb-3 "
             >
               <label
-                htmlFor={answer.key}
+                htmlFor={answer.id}
                 className="p-4 flex items-center gap-3 cursor-pointer select-none w-full"
               >
                 <input
-                  id={answer.key}
+                  id={answer.id}
                   type="radio"
-                  value={answer.key}
-                  checked={formValues[currentQuestion._id] === answer.key}
-                  {...register(currentQuestion._id)}
+                  value={answer.id}
+                  checked={formValues[currentQuestion.id] === answer.id}
+                  {...register(currentQuestion.id)}
                   className="
                 appearance-none w-4 h-4 rounded-full border border-gray-500 cursor-pointer 
                 transition-all duration-200 relative
@@ -149,7 +140,7 @@ export default function QuestionsComponent() {
               "
                 />
 
-                <p>{answer.answer}</p>
+                <p>{answer.text}</p>
               </label>
             </div>
           ))}
@@ -173,18 +164,18 @@ export default function QuestionsComponent() {
             {/* Next Button */}
             <Button
               type={
-                data?.questions.length === questionIndex + 1
+                data?.payload?.questions.length === questionIndex + 1
                   ? "submit"
                   : "button"
               }
               onClick={
-                data?.questions.length === questionIndex + 1
+                data?.payload?.questions.length === questionIndex + 1
                   ? handleSubmit
                   : handleNext
               }
               disabled={isLoading || isLoading || submitPending}
             >
-              {data?.questions.length === questionIndex + 1 ? "Finish" : "Next"}
+              {data?.payload?.questions.length === questionIndex + 1 ? "Finish" : "Next"}
             </Button>
           </div>
         </>

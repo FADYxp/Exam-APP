@@ -22,6 +22,7 @@ import { useDeleteAccount } from "@/app/(dashboard)/hooks/use-delete-account";
 import Modal from "@/components/shared/modal";
 import { ProfileFormType } from "@/lib/types/profile-form";
 import { EditProfilePayload } from "@/lib/types/edit-profile";
+import ChangeEmailModal from "./change-email-otp-modal";
 
 // type
 type ProfileKeys = "username" | "firstName" | "lastName" | "email" | "phone";
@@ -38,9 +39,9 @@ export default function ProfileForm() {
   // FORM
   const form = useForm<ProfileFormType>({
     defaultValues: {
-      username: user?.username ?? "",
       firstName: user?.firstName ?? "",
       lastName: user?.lastName ?? "",
+      username: user?.username ?? "",
       email: user?.email ?? "",
       phone: user?.phone ?? "",
     },
@@ -84,7 +85,7 @@ export default function ProfileForm() {
     }
     editProfile(changedValues, {
       onSuccess: async (data) => {
-        const updatedUser = data.user;
+        const updatedUser = data.payload.user;
         toast({ title: "Your profile has been updated." });
 
         // updating session
@@ -155,7 +156,7 @@ export default function ProfileForm() {
                 <FormItem>
                   <FormLabel>Username</FormLabel>
                   <FormControl>
-                    <Input type="text" {...field} />
+                    <Input disabled type="text" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -167,9 +168,9 @@ export default function ProfileForm() {
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Email</FormLabel>
+                  <FormLabel className="flex">Email<ChangeEmailModal/></FormLabel>
                   <FormControl>
-                    <Input type="email" {...field} />
+                    <Input readOnly type="email" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

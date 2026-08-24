@@ -7,7 +7,7 @@ export function useResetPassword() {
     mutationFn: async (values: ResetPasswordFields) => {
       const payload = await ResetPasswordService(values);
 
-      if ("code" in payload) {
+      if ( payload.code > 205) {
         throw new Error(payload.message);
       }
 

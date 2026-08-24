@@ -14,7 +14,7 @@ export function useDeleteAccount() {
     mutationFn: async () => {
       const payload = await DeleteAccountService();
 
-      if ("code" in payload) {
+      if (payload.code > 205) {
         throw new Error(payload.message);
       }
       return payload;

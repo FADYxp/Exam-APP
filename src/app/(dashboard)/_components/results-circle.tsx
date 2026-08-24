@@ -1,9 +1,13 @@
 "use client";
 import React from "react";
-import { ExamResultResponse } from "@/lib/types/answers-submit";
 
 interface ResultsCircleProps {
-  results: ExamResultResponse;
+  results: {
+    correct: number;
+    wrong: number;
+    total: number;
+    score: number;
+  };
 }
 
 export default function ResultsCircle({ results }: ResultsCircleProps) {

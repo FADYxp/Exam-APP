@@ -1,23 +1,29 @@
 export type Answer = {
-  key: string;
-  answer: string;
+  id: string;
+  text: string;
+  isCorrect: boolean;
+};
+
+export type Exam = {
+  id: string;
+  title: string;
 };
 
 export type Question = {
-  _id: string;
-  question: string;
-  answers: Answer[];
-  type: "single_choice" | "multiple_choice";
-  correct: string;
-  subject: string | null;
-  exam: {
-    _id: string;
-    title: string;
-  } | null;
+  id: string;
+  text: string;
+  examId: string;
+  immutable: boolean;
   createdAt: string;
+  updatedAt: string;
+  answers: Answer[];
+  exam: Exam;
 };
 
 export type QuestionsResponse = {
-  message: string;
-  questions: Question[];
+  status: boolean;
+  code: number;
+  payload: {
+    questions: Question[];
+  };
 };

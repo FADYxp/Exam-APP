@@ -8,8 +8,8 @@ import Link from "next/link";
 import InfiniteScroll from "react-infinite-scroll-component";
 import Loader from "@/components/shared/loader";
 import Loading from "@/app/loading";
+
 export default function Dashboard() {
-  // Query to fetch subjects with infinite scrolling
   const {
     data,
     isLoading,
@@ -19,20 +19,23 @@ export default function Dashboard() {
     refetch,
   } = useInfiniteQuery({
     queryKey: ["subjects"],
-
-    queryFn: async () => {
-      const response = await fetch("/api/subjects", { method: "GET" });
-      const data: Promise<SubjectsResponse> = await response.json();
-      return data;
+    // to fetch subjects with pagination, we will use the pageParam provided by useInfiniteQuery
+    queryFn: async ({ pageParam = 1 }) => {
+      const response = await fetch(`/api/subjects?page=${pageParam}`, { method: "GET" });
+      const result: SubjectsResponse = await response.json();
+      return result;
     },
-
     initialPageParam: 1,
+// to determine the next page number based on the last page's metadata
     getNextPageParam: (lastPage) => {
-      if (lastPage.metadata.currentPage === lastPage.metadata.numberOfPages)
-        return undefined;
-      return lastPage.metadata.currentPage + 1;
+      const metadata = lastPage.payload?.metadata;
+      if (!metadata || metadata.page === metadata.totalPages) return undefined;
+      return metadata.page + 1;
     },
   });
+
+  // to calculate the total number of items across all pages for InfiniteScroll's dataLength
+  const totalItems = data?.pages.reduce((acc, page) => acc + (page.payload?.data.length || 0), 0) || 0;
 
   return (
     <>
@@ -40,7 +43,7 @@ export default function Dashboard() {
         <Loader />
       ) : (
         <InfiniteScroll
-          dataLength={2} //This is important field to render the next data
+          dataLength={totalItems} 
           next={fetchNextPage}
           hasMore={hasNextPage}
           loader={
@@ -57,7 +60,6 @@ export default function Dashboard() {
               </p>
             )
           }
-          // below props only if you need pull down functionality
           refreshFunction={refetch}
           pullDownToRefresh
           pullDownToRefreshThreshold={50}
@@ -70,23 +72,24 @@ export default function Dashboard() {
             )
           }
         >
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
             <Suspense fallback={<Loading />}>
               {data?.pages.flatMap((page) =>
-                page.subjects?.map((subject) => (
+                page.payload?.data.map((subject) => (
                   <Link
-                    href={"/exams"}
-                    key={subject._id}
-                    className=" relative w-full h-448 "
+                    href={`/exams?diplomaId=${subject.id}&diplomaTitle=${subject.title}`} 
+                    key={subject.id}
+                    className="relative w-full h-80 rounded-lg overflow-hidden group shadow-lg"
                   >
                     <Image
-                      src={subject.icon}
-                      alt={subject.name}
+                      src={subject.image} 
+                      alt={subject.title} 
                       fill={true}
-                      className=" object-cover "
+                      className="object-cover transition-transform duration-300 group-hover:scale-110"
                     />
-                    <h2 className="absolute bottom-2 left-2 right-2 backdrop-blur-sm bg-blue-600/50 px-4 py-5  text-white font-semibold">
-                      {subject.name}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
+                    <h2 className="absolute bottom-4 left-4 right-4 text-white font-bold text-xl">
+                      {subject.title}
                     </h2>
                   </Link>
                 ))

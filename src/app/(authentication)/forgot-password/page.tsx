@@ -14,20 +14,13 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Header from "@/components/shared/header";
 import FormErrorsParagraph from "../_components/form-errors";
-import { MoveLeft, MoveRight} from "lucide-react";
-import {
-  InputOTP,
-  InputOTPGroup,
-  InputOTPSlot,
-} from "@/components/ui/input-otp";
+import { MoveLeft, MoveRight } from "lucide-react";
 import { useSendOtp } from "./_hooks/use-send-otp";
-import { useVerifyOtp } from "./_hooks/use-verify-otp";
 import { PasswordInput } from "@/components/ui/password-input";
 import { useResetPassword } from "@/hooks/use-reset-password";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   EmailSchema,
-  OtpSchema,
   ResetPasswordSchema,
 } from "@/lib/schemes/forgot-password.schema";
 import { useRouter } from "next/navigation";
@@ -36,7 +29,7 @@ import { useToast } from "@/hooks/use-toast";
 
 export default function ForgotPassword() {
   //toast
-  const {toast} = useToast();
+  const { toast } = useToast();
   //router
   const router = useRouter();
 
@@ -52,13 +45,6 @@ export default function ForgotPassword() {
     },
     resolver: zodResolver(EmailSchema),
   });
-  const formTwo = useForm({
-    defaultValues: {
-      resetCode: "",
-    },
-    resolver: zodResolver(OtpSchema),
-  });
-
   const formThree = useForm({
     defaultValues: {
       email: form.watch("email") || "",
@@ -70,7 +56,6 @@ export default function ForgotPassword() {
 
   //Mutations
   const { isPending, error, sendOtp } = useSendOtp();
-  const { verifyIsPending, verifyError, verifyOtp } = useVerifyOtp();
   const { ResetPasswordPending, ResetPasswordError, resetPassword } =
     useResetPassword();
 
@@ -113,7 +98,7 @@ export default function ForgotPassword() {
   const emailSubmit = async () => {
     sendOtp(form.getValues("email"), {
       onSuccess: () => {
-        setHeader("Verify OTP");
+        setHeader("Password Reset Sent");
         const newStep = 2;
         const newTimerDuration = 60;
         setStep(newStep);
@@ -133,21 +118,6 @@ export default function ForgotPassword() {
     });
   };
 
-  // SECOND STEP 2 Verify OTP
-  const otpSubmit = async () => {
-    verifyOtp(formTwo.getValues("resetCode"), {
-      onSuccess: () => {
-        setHeader("Create New Password");
-        setStep(3);
-      },
-      onError: (error) => {
-        formTwo.setError("root", {
-          message: error?.message || "Something went wrong , please try again",
-        });
-      },
-    });
-  };
-
   // THIRD STEP 3 Reset Password
   const passwordSubmit = async () => {
     const values = {
@@ -158,8 +128,8 @@ export default function ForgotPassword() {
     resetPassword(values, {
       onSuccess: () => {
         toast({
-          title: "Your password has been reset successfully"
-        })
+          title: "Your password has been reset successfully",
+        });
         router.push("/login");
       },
       onError: (error) => {
@@ -196,27 +166,29 @@ export default function ForgotPassword() {
             {step === 2 && (
               <>
                 <span className="block">
-                  Please enter the 6-digits code we have sent to :
+                  We have sent a password reset link to:
                 </span>
                 <span className="text-gray-800">
                   {" "}
                   {form.getValues("email")}.
                 </span>{" "}
-                {step === 2 && timer == 0 && (
+              
                   <span
-                    className="text-blue-600 cursor-pointer underline"
+                    className={timer == 0 ?"text-blue-600 cursor-pointer underline" : "text-gray-500 underline read-only cursor-not-allowed"}
                     onClick={() => {
-                      setStep(1);
+                      if (timer == 0) {setStep(1)};
                     }}
                   >
                     Edit
                   </span>
-                )}{" "}
-                {step === 2 && timer > 0 && (
-                  <span className="text-gray-300 cursor-pointer underline">
-                    Edit
-                  </span>
-                )}
+            
+                <p className="my-4 text-gray-700">
+                  Please check your inbox and follow the instructions to reset
+                  your password.
+                </p>
+                <span className="block">
+                If you don’t see the email within a few minutes, check your spam or junk folder.
+                </span>
               </>
             )}
             {step === 3 && "Create a new strong password for your account."}
@@ -258,70 +230,6 @@ export default function ForgotPassword() {
           </Form>
         )}
 
-        {/* // Second Step ►►►►►►►  */}
-        {step === 2 && (
-          <Form {...formTwo}>
-            <form onSubmit={formTwo.handleSubmit(otpSubmit)}>
-              <FormField
-                control={formTwo.control}
-                name="resetCode"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <InputOTP
-                        maxLength={6}
-                        value={field.value}
-                        onChange={field.onChange}
-                        className="!mb-4 w-full"
-                      >
-                        <InputOTPGroup className="">
-                          <InputOTPSlot index={0} />
-                          <InputOTPSlot index={1} />
-                          <InputOTPSlot index={2} />
-                          <InputOTPSlot index={3} />
-                          <InputOTPSlot index={4} />
-                          <InputOTPSlot index={5} />
-                        </InputOTPGroup>
-                      </InputOTP>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <p className="mb-4 text-center font-medium text-sm text-gray-500">
-                {timer > 0
-                  ? `You can request another code in: ${timer}s`
-                  : "Didn’t receive the code? "}
-                <span
-                  onClick={emailSubmit}
-                  className={`
-                    ${
-                      timer > 0
-                        ? ""
-                        : "!text-blue-600 cursor-pointer hover:underline"
-                    }
-                    `}
-                >
-                  {timer === 0 && "Resend"}
-                </span>
-              </p>
-              <FormErrorsParagraph
-                error={
-                  verifyError?.message ||
-                  formTwo.formState.errors?.root?.message
-                }
-              />
-
-              <Button
-                type="submit"
-                className="mt-6"
-                disabled={verifyIsPending && formTwo.formState.isSubmitted}
-              >
-                Verify Code
-              </Button>
-            </form>
-          </Form>
-        )}
         {/* // Third Step ►►►►►►► */}
 
         {step === 3 && (
@@ -359,11 +267,7 @@ export default function ForgotPassword() {
                   <FormItem>
                     <FormLabel>Confirm Password</FormLabel>
                     <FormControl>
-                      <PasswordInput
-                        className=""
-                        placeholder=""
-                        {...field}
-                      />
+                      <PasswordInput className="" placeholder="" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

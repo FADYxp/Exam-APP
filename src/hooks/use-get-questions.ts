@@ -5,8 +5,9 @@ export default function useGetQuestions(id: string) {
   return useQuery<QuestionsResponse>({
     queryKey: ["exam", id],
     queryFn: async () => {
-      const res = await fetch(`/api/questions?exam=${id}`, { method: "GET" });
-      return res.json();
+      const res = await fetch(`/api/questions?id=${id}`, { method: "GET" });
+      const data = await res.json()
+      return data;
     },
     staleTime: 1000 * 60 * 5,
     refetchOnMount: false,

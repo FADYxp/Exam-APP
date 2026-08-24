@@ -1,11 +1,16 @@
 import { User } from "next-auth";
 
 export type LoginResponse = {
-  token: string;
-  user: User["user"];
+  message?: string;
+  status: string;
+  code: number;
+  payload: {
+    user: User["user"];
+    token: string;
+  }
 };
 
 export type LoginFields = {
-  email: string;
+  username: string;
   password: string;
 };

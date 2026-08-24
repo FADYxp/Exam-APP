@@ -1,23 +1,49 @@
-export type Exam = {
-  _id: string;
+export type Diploma = {
+  id: string;
   title: string;
+};
+
+export type Exam = {
+  id: string;
+  title: string;
+  description: string;
+  image: string;
   duration: number;
-  subject: string;
-  numberOfQuestions: number;
-  active: boolean;
+  questionsCount: number;
+  diplomaId: string;
+  diploma: Diploma;
+  immutable: boolean;
   createdAt: string;
+  updatedAt: string;
 };
 
 export type Metadata = {
-  currentPage: number;
-  numberOfPages: number;
+  page: number;
   limit: number;
+  total: number;
+  totalPages: number;
 };
 
 export type ExamsResponse = {
+  status: boolean;
+  code: number;
+  payload: {
+    data: Exam[];
+    metadata: Metadata;
+  };
+};
+
+export type ApiError = {
+  path: string;
   message: string;
-  metadata: Metadata;
-  exams: Exam[];
+  messages: string[];
+};
+
+export type ErrorResponse = {
+  status: false;
+  code: number;
+  message: string;
+  errors: ApiError[];
 };
 
 export type SavedAnswersType = {
@@ -27,3 +53,4 @@ export type SavedAnswersType = {
     };
   };
 };
+

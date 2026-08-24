@@ -1,211 +1,97 @@
 "use client";
 import Link from "next/link";
-import React from "react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import React, { useState, useEffect } from "react";
 import Header from "@/components/shared/header";
-import { PhoneInput } from "../../../components/ui/phone-input";
-import { PasswordInput } from "@/components/ui/password-input";
-import {
-  RegistrationSchema,
-  RegistrationSchemaType,
-} from "@/lib/schemes/registration.schema";
+import { RegisterProgressBar } from "./_components/register-progress-bar";
+import { RegisterStep1Form } from "./_components/register-step1-form";
+import { RegisterStep2Form } from "./_components/register-step2-form";
+import { RegisterStep3Form } from "./_components/register-step3-form";
+import { RegisterStep4Form } from "./_components/register-step4-form";
 
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  Form,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormControl,
-  FormMessage,
-} from "@/components/ui/form";
-import { registerAction } from "@/lib/actions/register.action";
-import FormErrorsParagraph from "../_components/form-errors";
-import { useRouter } from "next/navigation";
-import { useToast } from "@/hooks/use-toast";
+interface ProfileData {
+  firstName: string;
+  lastName: string;
+  username: string;
+  phone: string;
+}
 
 export default function Register() {
-  //toast
-  const {toast} = useToast()
-  //Router
-  const router = useRouter();
-  // Form
-  const form = useForm<RegistrationSchemaType>({
-    defaultValues: {
-      username: "",
-      firstName: "",
-      lastName: "",
-      email: "",
-      password: "",
-      rePassword: "",
-      phone: "",
-    },
-    resolver: zodResolver(RegistrationSchema),
-  });
+  const [currentStep, setCurrentStep] = useState(1);
+  const [savedEmail, setSavedEmail] = useState("");
+  const [profileData, setProfileData] = useState<ProfileData | null>(null);
 
-  const onSubmit = async (data: RegistrationSchemaType) => {
-    const payload = await registerAction({ values: data });
-    if (payload?.code) {
-      switch (payload.message) {
-        case "username already exists":
-          form.setError("username", { message: payload.message });
-          break;
-        case "email already exists":
-          form.setError("email", { message: payload.message });
-          break;
-        default:
-          form.setError("root", { message: "Registration failed" });
-          break;
-      }
+  // Load saved email from localStorage
+  useEffect(() => {
+    const email = localStorage.getItem("registerEmail");
+    if (email) {
+      setSavedEmail(email);
     }
-    form.reset();
-    toast({ title: "Welcome to our platform ♥" });
-    router.push("/login");
+  }, []);
+
+  const handleStep1Next = (email: string) => {
+    setSavedEmail(email);
+    setCurrentStep(2);
   };
+
+  const handleStep2Next = () => {
+    setCurrentStep(3);
+  };
+
+  const handleStep3Next = (profile: ProfileData) => {
+    setProfileData(profile);
+    setCurrentStep(4);
+  };
+
+  const handleBack = () => {
+    setCurrentStep(currentStep - 1);
+  };
+
   return (
     <div className="h-screen flex items-center justify-center">
       <div className="px-36 w-full">
         <div className="mb-10">
           <Header>Register</Header>
         </div>
-        {/* INPUTS */}
-        <div className="">
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)}>
-              <div className="grid grid-cols-2 gap-3 ">
-                {/* FULL name */}
-                <FormField
-                  control={form.control}
-                  name="firstName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>First name</FormLabel>
-                      <FormControl>
-                        <Input type="text" placeholder="Fady" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="lastName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Last name</FormLabel>
-                      <FormControl>
-                        <Input type="text" placeholder="Refaat" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-              {/* The rest */}
 
-              {/* USERNAME */}
-              <FormField
-                control={form.control}
-                name="username"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Username</FormLabel>
-                    <FormControl>
-                      <Input type="text" placeholder="user123" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              {/* EMAIL */}
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="email"
-                        placeholder="user@example.com"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              {/* PHONE */}
-              <FormField
-                control={form.control}
-                name="phone"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Phone</FormLabel>
-                    <div className="grid grid-cols-1 !mt-0 ">
-                      <FormControl>
-                        <div className="flex">
-                          <PhoneInput className="" />
-                          <Input
-                            className="border-s-0"
-                            type="tel"
-                            placeholder="01012345678"
-                            {...field}
-                          />
-                        </div>
-                      </FormControl>
-                    </div>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              {/* PASSWORD */}
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Password</FormLabel>
-                    <FormControl>
-                      <PasswordInput placeholder="********" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              {/* CONFIRM PASSWORD */}
-              <FormField
-                control={form.control}
-                name="rePassword"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Confirm Password</FormLabel>
-                    <FormControl>
-                      <PasswordInput placeholder="********" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <Button
-                disabled={form.formState.isSubmitting}
-                type="submit"
-                className="mt-6"
-              >
-                Create Account
-              </Button>
-            </form>
-          </Form>
-          <p className="text-center text-sm mt-9">
-            Already have an account?{" "}
-            <Link href={"/login"} className="text-blue-600 hover:underline">
-              Login
-            </Link>
-          </p>
-          <FormErrorsParagraph error={form.formState.errors.root?.message} />
-        </div>
+        {/* Progress Bar */}
+        <RegisterProgressBar currentStep={currentStep} />
+
+        {/* STEP 1 - EMAIL */}
+        {currentStep === 1 && (
+          <RegisterStep1Form onNext={handleStep1Next} />
+        )}
+
+        {/* STEP 2 - VERIFY OTP */}
+        {currentStep === 2 && (
+          <RegisterStep2Form
+            email={savedEmail}
+            onNext={handleStep2Next}
+          />
+        )}
+
+        {/* STEP 3 - PROFILE */}
+        {currentStep === 3 && (
+          <RegisterStep3Form
+            onNext={handleStep3Next}
+            onBack={handleBack}
+          />
+        )}
+
+        {/* STEP 4 - PASSWORD */}
+        {currentStep === 4 && profileData && (
+          <RegisterStep4Form
+            email={savedEmail}
+            profileData={profileData}
+            onBack={handleBack}
+          />
+        )}
+
+        <p className="text-center text-sm mt-9">
+          Already have an account?{" "}
+          <Link href={"/login"} className="text-blue-600 hover:underline">
+            Login
+          </Link>
+        </p>
       </div>
     </div>
   );

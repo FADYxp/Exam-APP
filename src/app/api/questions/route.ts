@@ -7,11 +7,12 @@ export async function GET(request: Request) {
     throw new Error("Authentication token not found.");
   }
   const { searchParams } = new URL(request.url);
-  const id = searchParams.get("exam");
-  const response = await fetch(`${process.env.API}/questions?exam=${id}`, {
+  const examId =  searchParams.get("id");
+  const response = await fetch(`${process.env.API}/questions/exam/${examId}`, {
     method: "GET",
     headers: {
-      token: token.accessToken,
+      "Authorization": `Bearer ${token.accessToken}`,
+      "Content-Type": "application/json",
     },
   });
   const data = await response.json();

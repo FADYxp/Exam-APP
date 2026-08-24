@@ -19,9 +19,9 @@ export default function ChangePasswordForm() {
   const { changePassword, isPending } = useChangePassword();
   const form = useForm({
     defaultValues: {
-      oldPassword: "",
-      password: "",
-      rePassword: "",
+      currentPassword: "",
+      newPassword: "",
+      confirmPassword: "",
     },
     resolver: zodResolver(ChangePasswordSchema),
   });
@@ -48,7 +48,7 @@ export default function ChangePasswordForm() {
           {/* OLD PASSWORD */}
           <FormField
             control={form.control}
-            name="oldPassword"
+            name="currentPassword"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Current Password</FormLabel>
@@ -63,7 +63,7 @@ export default function ChangePasswordForm() {
           {/* NEW PASSWORD */}
           <FormField
             control={form.control}
-            name="password"
+            name="newPassword"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>New Password</FormLabel>
@@ -78,7 +78,7 @@ export default function ChangePasswordForm() {
           {/* REPEAT PASSWORD */}
           <FormField
             control={form.control}
-            name="rePassword"
+            name="confirmPassword"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Confirm New Password</FormLabel>

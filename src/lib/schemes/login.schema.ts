@@ -1,9 +1,9 @@
 import z from "zod";
 
 export const LoginSchema = z.object({
-  email: z
-    .email({ error: "Email is required" })
-    .min(7, "Please enter a valid email"),
+  username: z
+    .string({ error: "Username is required" })
+    .min(3, "Please enter a valid username"),
   password: z
     .string()
     .nonempty("Password is required")

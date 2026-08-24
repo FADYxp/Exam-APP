@@ -6,11 +6,11 @@ export default async function DeleteAccountService() {
   if (!token) {
     throw new Error("Authentication token not found.");
   }
-  const response = await fetch(`${process.env.API}/auth/deleteMe`, {
+  const response = await fetch(`${process.env.API}/users/account`, {
     method: "DELETE",
     headers: {
       "Content-Type": "application/json",
-      token: token.accessToken,
+        "Authorization": `Bearer ${token.accessToken}`,
     },
   });
 

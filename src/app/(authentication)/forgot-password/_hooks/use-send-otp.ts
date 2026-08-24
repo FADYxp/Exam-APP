@@ -6,7 +6,7 @@ export function useSendOtp() {
     mutationFn: async (email: string) => {
       const payload = await SendOtpService(email);
 
-      if ("code" in payload) {
+      if ( payload.code > 203) {
         throw new Error(payload.message);
       }
 

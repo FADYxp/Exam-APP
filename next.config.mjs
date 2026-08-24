@@ -4,7 +4,7 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "exam.elevateegy.com",
+        hostname: "exam-app.elevate-bootcamp.cloud",
       },
     ],
   },

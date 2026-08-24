@@ -7,7 +7,7 @@ export async function registerAction({
 }: {
   values: RegistrationSchemaType;
 }) {
-  const response: Response = await fetch(`${process.env.API}/auth/signup`, {
+  const response: Response = await fetch(`${process.env.API}/auth/register`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

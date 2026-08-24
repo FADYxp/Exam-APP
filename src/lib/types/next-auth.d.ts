@@ -14,8 +14,9 @@ declare module "next-auth" {
       phone: string;
       role: string;
       isVerified: boolean;
-      _id: string;
+      id: string;
       createdAt: string;
+      emailVerified: boolean;
     };
   }
 

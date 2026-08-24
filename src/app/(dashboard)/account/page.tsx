@@ -6,6 +6,7 @@ export default async function Account() {
       <div className=" w-full">
         {/* Form */}
         <ProfileForm />
+        
       </div>
     </div>
   );

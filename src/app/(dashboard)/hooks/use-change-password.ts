@@ -15,8 +15,7 @@ export function useChangePassword() {
   } = useMutation({
     mutationFn: async (values: ChangePasswordType) => {
       const payload = await changePasswordService({ values });
-
-      if ("code" in payload) {
+      if (payload.code > 205) {
         throw new Error(payload.message);
       }
       return payload;
@@ -28,7 +27,6 @@ export function useChangePassword() {
       await update({
         accessToken: newToken,
       });
-
       location.reload();
     },
   });

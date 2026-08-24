@@ -2,7 +2,7 @@
 import { ForgotPasswordResponse } from "../_types/forgot-password";
 
 export default async function SendOtpService(email: string) {
-  const response = await fetch(`${process.env.API}/auth/forgotPassword`, {
+  const response = await fetch(`${process.env.API}/auth/forgot-password`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

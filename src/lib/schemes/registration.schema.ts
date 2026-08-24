@@ -31,7 +31,7 @@ export const RegistrationSchema = z
         "Password must contain at least 1 special character (#?!@$%^&*-)"
       ),
 
-    rePassword: z
+    confirmPassword: z
       .string({ error: "Please re-enter your password" })
       .nonempty({ error: "Please re-enter your password" }),
     phone: z
@@ -41,7 +41,7 @@ export const RegistrationSchema = z
   })
   .refine(
     function (object) {
-      if (object.password === object.rePassword) {
+      if (object.password === object.confirmPassword) {
         return true;
       }
       return false;

@@ -11,14 +11,16 @@ export function useEditProfile() {
     isPending,
     isError,
   } = useMutation<EditProfileSuccessResponse, Error, EditProfilePayload>({
+  
     mutationFn: async (values) => {
       const payload = await EditProfileService(values);
 
-      if ("code" in payload) {
+      if (payload.code > 205) {
         throw new Error(payload.message);
       }
       return payload;
     },
+    
   });
   return { editProfile, isPending, isError };
 }

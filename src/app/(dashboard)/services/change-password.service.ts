@@ -11,16 +11,16 @@ export default async function changePasswordService({
   if (!token) {
     throw new Error("Authentication token not found.");
   }
-  const response = await fetch(`${process.env.API}/auth/changePassword`, {
-    method: "PATCH",
+  const response = await fetch(`${process.env.API}/users/change-password`, {
+    method: "POST",
     headers: {
       "Content-Type": "application/json",
-      token: token.accessToken,
+     "Authorization": `Bearer ${token.accessToken}`,
     },
     body: JSON.stringify({
-      oldPassword: values.oldPassword,
-      password: values.password,
-      rePassword: values.rePassword,
+      currentPassword: values.currentPassword,
+      newPassword: values.newPassword,
+      confirmPassword: values.confirmPassword,
     }),
   });
   const payload = await response.json();

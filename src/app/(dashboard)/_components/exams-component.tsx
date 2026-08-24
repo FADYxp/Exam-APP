@@ -1,60 +1,119 @@
 "use client";
 import { ExamsResponse } from "@/lib/types/exams";
 import { useQuery } from "@tanstack/react-query";
-import { Timer } from "lucide-react";
+import { Timer, BookOpen } from "lucide-react";
 import React from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import Image from "next/image";
 import Loader from "@/components/shared/loader";
 
 export default function ExamsComponent() {
   const router = useRouter();
-  const { data, isLoading } = useQuery<ExamsResponse>({
-    queryKey: ["exams"],
-    queryFn: async () => {
-      const res = await fetch("/api/exams");
+  const searchParams = useSearchParams();
+  const diplomaId = searchParams.get("diplomaId");
+  const diplomaTitle = searchParams.get("diplomaTitle");
 
-      return res.json();
+  const { data, isLoading } = useQuery<ExamsResponse>({
+    queryKey: ["exams", diplomaId],
+    queryFn: async () => {
+      const url = new URL("/api/exams", window.location.origin);
+      if (diplomaId) {
+        url.searchParams.append("diplomaId", diplomaId);
+      }
+      const res = await fetch(url.toString());
+      const data = await res.json();
+      console.log(data);
+      return data;
     },
     refetchOnMount: true,
+    enabled: !!diplomaId,
   });
+
+  if (!diplomaId) {
+    return <div className="text-gray-500 text-center py-8">No diploma selected</div>;
+  }
+
+  if (isLoading) {
+    return <Loader />;
+  }
+
+  if (!data?.payload?.data || data.payload.data.length === 0) {
+    return <div className="text-gray-500 text-center py-8">No exams available</div>;
+  }
+
   return (
-    <>
-      {isLoading ? (
-        <Loader />
-      ) : (
-        data?.exams.map((exam) => (
-          <div
-            key={exam._id}
-            className="flex flex-col gap-4 bg-blue-50 cursor-pointer"
-            onClick={() => {
-              localStorage.setItem(
-                "examDuration",
-                JSON.stringify(exam.duration)
-              );
-              const slug = exam.title.toLowerCase().replace(/\s+/g, "-");
-              router.push(
-                `/exams/${slug}/Questions?id=${exam._id}&title=${slug}`
-              );
-            }}
-          >
-            <div className="flex items-center justify-between p-4">
-              <div>
-                <h2 className="text-blue-600 text-xl font-semibold">
+    <div className="space-y-4">
+      {data.payload.data.map((exam) => (
+            <div
+              key={exam.id}
+              className="flex gap-4 bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+            >
+              {/* Exam Image/Icon */}
+              <div className="relative flex-shrink-0 w-20 h-20 bg-gradient-to-br from-blue-400 to-blue-600 rounded-lg flex items-center justify-center overflow-hidden">
+                {exam.image ? (
+                  <Image
+                    src={exam.image}
+                    alt={exam.title}
+                    fill
+                    sizes="80px"
+                    className="object-cover"
+                  />
+                ) : (
+                  <BookOpen className="w-10 h-10 text-white" />
+                )}
+              </div>
+
+              {/* Exam Content */}
+              <div className="flex-1">
+                <h2
+                  className="text-blue-600 text-lg font-semibold hover:underline cursor-pointer mb-1"
+                  onClick={() => {
+                    localStorage.setItem(
+                      "examDuration",
+                      JSON.stringify(exam.duration)
+                    );
+                    router.push(
+                      `/exams?examId=${exam.id}&title=${exam.title}`
+                    );
+                  }}
+                >
                   {exam.title}
                 </h2>
-                <p className="text-gray-500 text-sm">
-                  {exam.numberOfQuestions} Questions
+                <p className="text-gray-600 text-sm line-clamp-2">
+                  {exam.description}
                 </p>
               </div>
 
-              <div className="flex gap-1 items-center">
-                <Timer strokeWidth={1.5} className="text-2xl text-gray-400" />
-                <p className="text-sm">Duration: {exam.duration} minutes</p>
+              {/* Exam Info & Action */}
+              <div className="flex flex-col items-end justify-between">
+                <div className="flex flex-col gap-2 text-right text-sm">
+                  <div className="flex items-center gap-1 justify-end">
+                    <BookOpen strokeWidth={1.5} className="w-4 h-4 text-gray-500" />
+                    <span className="text-gray-600">{exam.questionsCount} Questions</span>
+                  </div>
+                  <div className="flex items-center gap-1 justify-end">
+                    <Timer strokeWidth={1.5} className="w-4 h-4 text-gray-500" />
+                    <span className="text-gray-600">{exam.duration} mins</span>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => {
+                    localStorage.setItem(
+                      "examDuration",
+                      JSON.stringify(exam.duration)
+                    );
+                    router.push(
+                      `/exams/${exam.title}?diplomaId=${diplomaId}&diplomaTitle=${diplomaTitle}&id=${exam.id}`
+                    );
+                  }}
+                  className="px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  START →
+                </button>
               </div>
             </div>
-          </div>
-        ))
-      )}
-    </>
+          ))}
+    </div>
   );
 }

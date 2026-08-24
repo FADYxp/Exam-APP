@@ -1,8 +1,8 @@
 import z from "zod";
 
 export const ChangePasswordSchema = z.object({
-  oldPassword: z.string().nonempty({ error: "Please enter your old password" }),
-  password: z
+  currentPassword: z.string().nonempty({ error: "Please enter your old password" }),
+  newPassword: z
     .string()
     .nonempty({ error: "Please enter your new password" })
     .min(8, "Password must be at least 8 characters long")
@@ -13,10 +13,10 @@ export const ChangePasswordSchema = z.object({
       /[#!?@$%^&*-]/,
       "Password must contain at least 1 special character (#?!@$%^&*-)"
     ),
-  rePassword: z.string().nonempty({ error: "Please confirm your password" }),
-})  .refine((data) => data.password === data.rePassword, {
+  confirmPassword: z.string().nonempty({ error: "Please confirm your password" }),
+})  .refine((data) => data.newPassword === data.confirmPassword, {
     message: "Passwords do not match",
-    path: ["rePassword"],
+    path: ["confirmPassword"],
   });
 
 

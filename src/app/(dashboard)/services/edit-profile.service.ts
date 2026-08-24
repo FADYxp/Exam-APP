@@ -6,17 +6,19 @@ export default async function EditProfileService( values: unknown ) {
   if (!token) {
     throw new Error("Authentication token not found.");
   }
-  const response = await fetch(`${process.env.API}/auth/editProfile`, {
-    method: "PUT",
+  
+  const response = await fetch(`${process.env.API}/users/profile`, {
+    method: "PATCH",
     headers: {
       "Content-Type": "application/json",
-      token: token.accessToken,
+      "Authorization": `Bearer ${token.accessToken}`,
     },
     body: JSON.stringify(values),
   });
 
   const payload = await response?.json()
 
+  console.log(payload)
   return payload
 }
 

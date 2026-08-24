@@ -13,30 +13,30 @@ export const authOptions: NextAuthOptions = {
     Credentials({
       name: "Credentials",
       credentials: {
-        email: { label: "Email", type: "text" },
+        username: { label: "username", type: "text" },
         password: { label: "Password", type: "password" },
       },
 
       async authorize(credentials) {
-        if (!credentials?.email || !credentials.password) {
-          throw new Error("Email and password are required");
+        if (!credentials?.username || !credentials.password) {
+          throw new Error("Username and password are required");
         }
         const fields = {
-          email: credentials.email,
+          username: credentials.username,
           password: credentials.password,
         };
 
-        const payload: ApiResponse<LoginResponse> = await LoginService(fields);
+        const response: LoginResponse = await LoginService(fields);
 
 
-        if ("code" in payload) {
-          throw new Error(payload.message);
+        if ("message" in  response) {
+          throw new Error(response.message);
         }
 
         return {
-          id: payload.user._id,
-          accessToken: payload.token,
-          user: payload.user,
+          id: response.payload.user.id,
+          accessToken: response.payload.token,
+          user: response.payload.user,
         };
       },
     }),
