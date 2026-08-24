@@ -142,7 +142,7 @@ const params = useSearchParams()
           <RotateCcw size={18} />
           Restart
         </Button>
-        <Button onClick={() => router.push(`/exams?diplomaId=${params.get("diplomaId")}`)} className="gap-2">
+        <Button onClick={() => router.push(`/exams?diplomaId=${params.get("diplomaId")}&diplomaTitle=${params.get("diplomaTitle")}`)} className="gap-2">
           <FolderSearch size={18} />
           Explore
         </Button>
