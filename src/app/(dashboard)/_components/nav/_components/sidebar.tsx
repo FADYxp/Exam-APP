@@ -1,7 +1,7 @@
 "use client";
-import React from "react";
+import React, { ReactNode, useEffect, useState } from "react";
 import Link from "next/link";
-import { GraduationCap, Moon, Sun, UserRound } from "lucide-react";
+import { GraduationCap, Menu, Moon, Sun, UserRound, X } from "lucide-react";
 import { usePathname } from "next/navigation";
 import Navbar from "./navbar";
 import { useSession } from "next-auth/react";
@@ -18,16 +18,41 @@ import { useTheme } from "@/components/providers/_components/theme-provider";
 export default function SidebarWithNavbar({
   children,
 }: {
-  children: React.ReactNode;
+  children:ReactNode;
 }) {
   const { data: session, status } = useSession();
   const pathname = usePathname();
   const { theme, toggleTheme } = useTheme();
+  const [isSidebarOpen, setIsSidebarOpen] =useState(false);
+
+ useEffect(() => {
+    setIsSidebarOpen(false);
+  }, [pathname]);
 
   return (
     <>
       {/* Sidebar */}
-      <nav className="fixed top-0 bg-blue-50 dark:bg-sidebar left-0 h-full w-[22.625rem] flex flex-col p-10">
+      {isSidebarOpen && (
+        <button
+          type="button"
+          aria-label="Close navigation menu"
+          className="fixed inset-0 z-30 bg-black/20 lg:hidden"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+      <nav
+        className={`fixed inset-y-0 left-0 z-40 flex w-[min(22.625rem,calc(100%-2rem))] flex-col bg-blue-50 p-6 shadow-xl transition-transform duration-300 dark:bg-sidebar sm:p-10 lg:translate-x-0 lg:shadow-none ${
+          isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
+        <button
+          type="button"
+          aria-label="Close navigation menu"
+          className="absolute right-4 top-4 rounded-md p-2 text-gray-500 hover:bg-black/5 lg:hidden dark:text-sidebar-foreground dark:hover:bg-white/5"
+          onClick={() => setIsSidebarOpen(false)}
+        >
+          <X className="h-5 w-5" />
+        </button>
         <div className="flex flex-col gap-2 mb-16">
           <Image
             src={logo}
@@ -76,7 +101,7 @@ export default function SidebarWithNavbar({
           {/* BOTTOM SECTION: Theme Toggle & Profile */}
           <div className="flex flex-col gap-6 mt-auto">
             
-            {/* THEME TOGGLE BUTTON (Modern Premium Design) */}
+            {/* THEME TOGGLE BUTTON  */}
             <button
               onClick={toggleTheme}
               className="group relative flex w-full items-center justify-between rounded-2xl bg-white p-2 pr-5 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07)] ring-1 ring-gray-100 transition-all duration-300 hover:shadow-[0_8px_25px_-5px_rgba(0,0,0,0.1)] active:scale-[0.97] dark:bg-[#1e293b] dark:ring-gray-800 dark:hover:shadow-[0_8px_25px_-5px_rgba(0,0,0,0.4)]"
@@ -148,10 +173,18 @@ export default function SidebarWithNavbar({
       </nav>
 
       {/* Content wrapper */}
-      <div className="ms-[22.625rem] flex flex-col min-h-screen">
+      <div className="flex min-h-screen min-w-0 flex-col lg:ms-[22.625rem]">
+        <button
+          type="button"
+          aria-label="Open navigation menu"
+          className="fixed right-4 top-4 z-20 rounded-md bg-white p-2 text-gray-700 shadow-sm ring-1 ring-gray-200 hover:bg-gray-50 lg:hidden dark:bg-sidebar dark:text-sidebar-foreground dark:ring-sidebar-border dark:hover:bg-sidebar-accent"
+          onClick={() => setIsSidebarOpen(true)}
+        >
+          <Menu className="h-5 w-5" />
+        </button>
         <Navbar />
         <MainHeader />
-        <div className="flex-col flex-1 p-6">{children}</div>
+        <div className="min-w-0 flex-1 p-3 sm:p-4 lg:p-6">{children}</div>
       </div>
     </>
   );

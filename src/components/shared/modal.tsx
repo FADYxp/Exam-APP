@@ -44,9 +44,9 @@ export default function Modal({
         </DialogHeader>
         </div>
 
-        <div className="flex items-center justify-center gap-2 border border-r-0 border-l-0 border-b-0 border-t-gray-200 mt-12 p-6 ">
+        <div className="mt-12 flex flex-col items-center justify-center gap-2 border border-r-0 border-b-0 border-l-0 border-t-gray-200 p-4 sm:flex-row sm:p-6">
 <DialogClose>
-              <Button type="button"  disabled={isPending} variant={"gray"} className="w-56">
+              <Button type="button"  disabled={isPending} variant={"gray"} className="w-full sm:w-56">
             Cancel
           </Button>
 </DialogClose>
@@ -56,7 +56,7 @@ export default function Modal({
               deleteAccount();
             }}
             variant={"destructive"}
-            className="w-56"
+            className="w-full sm:w-56"
           >
             Yes, delete
           </Button>

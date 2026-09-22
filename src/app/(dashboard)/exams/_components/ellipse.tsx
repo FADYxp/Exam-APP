@@ -3,7 +3,7 @@ import React from 'react'
 export default function Ellipse({correct}: { correct: boolean }) {
   return (
 <svg width="20" height="20">
-  {/* الدايرة الخارجية */}
+  {/* out Circle*/}
   <circle
     cx="10"
     cy="10"

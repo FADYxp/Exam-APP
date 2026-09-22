@@ -43,11 +43,11 @@ export default function MainHeader() {
   }, [pathName, diplomaTitle]);
 
   return (
-    <div className="flex gap-2 m-6 mb-0">
+    <div className="m-3 mb-0 flex gap-2 sm:m-6 sm:mb-0">
       {title !== "dashboard" && (
         <Button
           variant={"outline"}
-          className="w-9 h-fit bg-white text-blue-600 py-[1.6563rem]"
+          className="h-fit w-9 bg-white py-3 text-blue-600 sm:py-[1.6563rem]"
           onClick={() => {
             history.back();
           }}
@@ -56,9 +56,9 @@ export default function MainHeader() {
         </Button>
       )}
 
-      <div className="bg-blue-600 p-4 text-white flex items-center gap-4 w-full">
-        {Icon && <Icon size={45} />}
-        <h1 className="font-inter capitalize text-[2rem] font-semibold">
+      <div className="flex min-w-0 w-full items-center gap-3 bg-blue-600 p-3 text-white sm:gap-4 sm:p-4">
+        {Icon && <Icon className="shrink-0" size={32} />}
+        <h1 className="min-w-0 truncate font-inter text-xl font-semibold capitalize sm:text-[2rem]">
           {title}
         </h1>
       </div>

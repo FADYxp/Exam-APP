@@ -1,11 +1,34 @@
 "use client";
 import React, { useEffect, useState } from "react";
 
-export default function ExamTimer({ onTimeUp }: { onTimeUp: () => void }) {
+const END_TIME_KEY = "examEndTime";
+export const EXAM_END_TIME_KEY = END_TIME_KEY;
+
+// React.memo: skip re-rendering this component entirely when its props
+// haven't changed, even if the parent (QuestionsComponent) re-renders
+// on every keystroke/answer-select via react-hook-form's watch().
+// Without this, ExamTimer's function body re-runs on every parent
+// render regardless of whether onTimeUp actually changed.
+function ExamTimer({ onTimeUp }: { onTimeUp: () => void }) {
   const Duration = Number(localStorage.getItem("examDuration"));
   const totalSeconds = Duration! * 60;
 
-  const [timeLeft, setTimeLeft] = useState(totalSeconds);
+  // Resolve (and persist) the exam's actual end timestamp once, on
+  // first render — not the remaining seconds directly. Storing a wall-
+  // clock end time survives refresh AND tab-throttling without drift,
+  // unlike persisting a decrementing counter.
+  const [timeLeft, setTimeLeft] = useState<number>(() => {
+    const storedEndTime = localStorage.getItem(END_TIME_KEY);
+
+    if (storedEndTime) {
+      const remaining = Math.round((Number(storedEndTime) - Date.now()) / 1000);
+      return Math.max(0, remaining);
+    }
+
+    const endTime = Date.now() + totalSeconds * 1000;
+    localStorage.setItem(END_TIME_KEY, String(endTime));
+    return totalSeconds;
+  });
 
   const minutes = Math.floor(timeLeft / 60);
   const seconds = timeLeft % 60;
@@ -18,28 +41,38 @@ export default function ExamTimer({ onTimeUp }: { onTimeUp: () => void }) {
   const progress = (timeLeft / totalSeconds) * circumference;
   const finished = circumference - progress;
 
-  // timer useEffect
   useEffect(() => {
+    const endTime = Number(localStorage.getItem(END_TIME_KEY));
+
     const timer = setInterval(() => {
-      setTimeLeft((t) => {
-        if (t <= 1) {
-          clearInterval(timer);
-          onTimeUp();
-          return 0;
-        }
-        return t - 1;
-      });
+      const remaining = Math.round((endTime - Date.now()) / 1000);
+
+      if (remaining <= 0) {
+        clearInterval(timer);
+        setTimeLeft(0);
+        // Time is genuinely over — clear the stored end time so the
+        // NEXT exam attempt starts a fresh countdown instead of
+        // reading this finished one.
+        localStorage.removeItem(END_TIME_KEY);
+        onTimeUp();
+        return;
+      }
+
+      setTimeLeft(remaining);
     }, 1000);
 
+    // Cleanup: only stop the interval. We deliberately do NOT touch
+    // localStorage here — an ordinary unmount (e.g. navigating away
+    // mid-exam) must leave the stored end time intact so refreshing
+    // or coming back resumes the same countdown, not a fresh one.
     return () => {
       clearInterval(timer);
-      localStorage.setItem("examDuration", JSON.stringify(Duration));
     };
-  }, [onTimeUp, Duration]);
+  }, [onTimeUp]);
 
   return (
     <div className="relative w-[60px] h-[60px] flex items-center justify-center">
-      {/* الخلفية */}
+      {/* Back-Ground */}
       <svg className="absolute top-0 left-0" width={size} height={size}>
         <circle
           cx={size / 2}
@@ -51,7 +84,7 @@ export default function ExamTimer({ onTimeUp }: { onTimeUp: () => void }) {
         />
       </svg>
 
-      {/* الدائرة */}
+      {/* Circle */}
       <svg className="absolute top-0 left-0" width={size} height={size}>
         <circle
           cx={size / 2}
@@ -74,3 +107,5 @@ export default function ExamTimer({ onTimeUp }: { onTimeUp: () => void }) {
     </div>
   );
 }
+
+export default React.memo(ExamTimer);

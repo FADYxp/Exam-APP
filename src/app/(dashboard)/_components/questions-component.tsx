@@ -3,41 +3,32 @@
 import { Button } from "@/components/ui/button";
 import useGetQuestions from "@/hooks/use-get-questions";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
-import ExamTimer from "@/app/(dashboard)/_components/exam-timer";
+import ExamTimer, { EXAM_END_TIME_KEY } from "@/app/(dashboard)/_components/exam-timer";
 import { ExamSubmitRequest } from "@/lib/types/answers-submit";
 import { useSubmitExamAnswers } from "@/app/(dashboard)/exams/_hooks/use-submit-exam-answers";
 import ProgressBar from "@/app/(dashboard)/_components/exam-progress-bar";
 import Loader from "@/components/shared/loader";
 import Review from "../exams/_components/review";
 
-// Saved Answers Type
-
-// Questions Component
 export default function QuestionsComponent() {
   const [questionIndex, setQuestionIndex] = useState(0);
   const [startedAt, setStartedAt] = useState<string>("");
-  // form
   const { register, watch, setValue, getValues } = useForm({});
 
-  //  Search Params
   const searchParams = useSearchParams();
   const examId = searchParams.get("id");
 
-  // mutations
-  // Exam Questions Function
   const { data, isLoading } = useGetQuestions(examId!);
   const { submitExamAnswers, submitPending, submitData } = useSubmitExamAnswers();
 
-  // Initialize startedAt on component mount
   useEffect(() => {
     if (!startedAt) {
       setStartedAt(new Date().toISOString());
     }
   }, [startedAt]);
 
-  // Variables
   const currentQuestion = useMemo(() => {
     return data?.payload?.questions[questionIndex];
   }, [data, questionIndex]);
@@ -45,7 +36,6 @@ export default function QuestionsComponent() {
   const totalQuestions = data?.payload?.questions.length ?? 0;
   const formValues = watch();
 
-  // useEffect to set default answer for current question
   useEffect(() => {
     if (currentQuestion) {
       const firstAnswerKey = currentQuestion.answers[0].id;
@@ -55,43 +45,47 @@ export default function QuestionsComponent() {
     }
   }, [questionIndex, currentQuestion, formValues, setValue]);
 
-  // FUNCTIONS
-  // Handle Next Question
   const handleNext = () => {
     if (questionIndex < totalQuestions - 1) {
       setQuestionIndex((prev) => prev + 1);
     }
   };
-  // Handle previous Question
   const handlePrev = () => {
     if (questionIndex > 0) {
       setQuestionIndex((prev) => prev - 1);
     }
   };
 
-  //Sorting answers Function
-  const sortAnswers = (): ExamSubmitRequest => {
+  // FIX: wrapped in useCallback so this function keeps the SAME
+  // reference across re-renders (it only changes if examId/startedAt
+  // genuinely change). This is what makes ExamTimer's React.memo
+  // actually effective — otherwise a fresh `onTimeUp` function every
+  // render defeats the memo and re-triggers the timer's internal
+  // useEffect (tearing down/rebuilding its interval) on every keystroke.
+  const handleSubmit = useCallback(() => {
     const answers = Object.entries(getValues()).map(
       ([questionId, answerId]) => ({
         questionId,
         answerId: String(answerId),
       })
     );
-    return {
+    const submissionData: ExamSubmitRequest = {
       examId: examId!,
       answers,
       startedAt,
     };
-  };
-
-  // Handle submit Answers
-  const handleSubmit = () => {
-    const submissionData = sortAnswers();
-    console.log(submissionData)
     submitExamAnswers(submissionData);
-  };
 
-  //   Rendering
+    // Only clear the timer's PROGRESS (examEndTime) — NOT examDuration.
+    // examDuration is the exam's configured length (e.g. "30" minutes),
+    // set elsewhere before this page loads. Clearing it here left
+    // ExamTimer reading `0` on the very next mount (e.g. after the
+    // "Restart" button's location.reload()), which made the timer
+    // think time was already up instantly, auto-submitting an empty
+    // exam and crashing Review on the missing selectedAnswer fields.
+    localStorage.removeItem(EXAM_END_TIME_KEY);
+  }, [examId, startedAt, getValues, submitExamAnswers]);
+
   if (isLoading) return <Loader />;
   if (submitPending)
     return (
@@ -101,14 +95,13 @@ export default function QuestionsComponent() {
       </>
     );
   return (
-    <div className="bg-white flex flex-col gap-4 p-6 ">
+    <div className="flex min-w-0 flex-col gap-4 bg-white p-3 sm:p-6">
       <ProgressBar current={questionIndex + 1} total={totalQuestions} />
       {submitData ? (
-        // results review component
         <Review submitData={submitData} />
       ) : (
         <>
-          <h2 className="font-semibold text-2xl mt-10 mb-4 text-blue-600 ">
+          <h2 className="mt-8 mb-4 break-words text-xl font-semibold text-blue-600 sm:mt-10 sm:text-2xl">
             {currentQuestion?.text}
           </h2>
           {currentQuestion?.answers.map((answer) => (
@@ -146,22 +139,21 @@ export default function QuestionsComponent() {
           ))}
 
           {/* Navigation Buttons */}
-          <div className="flex gap-4 justify-between items-center mt-6">
-            {/* Previous Button */}
+          <div className="flex flex-wrap items-center justify-between gap-3 mt-6">
             <Button
               onClick={handlePrev}
               disabled={questionIndex === 0 || isLoading || submitPending}
               variant={"gray"}
+              className="w-auto"
             >
               Previous
             </Button>
 
-            {/* Exam Timer */}
+            {/* Exam Timer — now isolated from parent re-renders */}
             <div className="">
               <ExamTimer onTimeUp={handleSubmit} />
             </div>
 
-            {/* Next Button */}
             <Button
               type={
                 data?.payload?.questions.length === questionIndex + 1
@@ -174,6 +166,7 @@ export default function QuestionsComponent() {
                   : handleNext
               }
               disabled={isLoading || isLoading || submitPending}
+              className="w-auto"
             >
               {data?.payload?.questions.length === questionIndex + 1 ? "Finish" : "Next"}
             </Button>

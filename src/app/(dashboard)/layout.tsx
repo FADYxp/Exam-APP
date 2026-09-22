@@ -7,7 +7,7 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="bg-gray-50 dark:bg-background w-full min-h-screen ">
+    <div className="min-h-screen w-full overflow-x-hidden bg-gray-50 dark:bg-background">
       <Navbar>{children}</Navbar>
     </div>
   );

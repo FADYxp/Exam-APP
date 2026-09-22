@@ -20,7 +20,7 @@ export default function AuthLayout({
 }) {
   return (
     <div
-      className={`${geistMono.variable} ${geistMono.className} ${inter.variable} antialiased grid grid-cols-2`}
+      className={`${geistMono.variable} ${geistMono.className} ${inter.variable} antialiased grid min-h-screen grid-cols-1 lg:grid-cols-2`}
     >
       <AuthenticationStatic />
       {children}

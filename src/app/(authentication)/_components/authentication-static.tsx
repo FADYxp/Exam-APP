@@ -30,7 +30,7 @@ export default function AuthenticationStatic() {
   ];
   return (
 <>
-  <div className="relative h-screen flex items-center justify-center overflow-hidden bg-white">
+  <div className="relative hidden min-h-screen items-center justify-center overflow-hidden bg-white lg:flex">
 
     {/* Top Right Blur Circle */}
     <div className="absolute w-[25.125rem] h-[25.125rem] bg-blue-400 rounded-full top-[100px] right-[-100px] blur-[170px]"></div>
@@ -39,19 +39,19 @@ export default function AuthenticationStatic() {
     <div className="absolute w-[25.125rem] h-[25.125rem] bg-blue-400 rounded-full bottom-0 left-[-120px] blur-[170px]"></div>
 
     {/* Your content */}
-    <div className="px-36 relative z-10">
+    <div className="relative z-10 w-full max-w-2xl px-8 xl:px-16">
       <ExamAppIcon />
-      <div className="flex-wrap py-32">
-        <div className="mb-16">
+      <div className="flex-wrap py-16 xl:py-24">
+        <div className="mb-12">
           <Header>
             Empower your learning journey with our smart exam platform.
           </Header>
         </div>
 
-        <div className="flex flex-wrap gap-9">
+        <div className="flex flex-col gap-7">
           {content.map((item, index) => {
             return (
-              <div key={index} className="flex gap-6">
+              <div key={index} className="flex min-w-0 gap-4">
                 <div className="p-1 w-10 h-10 text-blue-600 border-2 border-blue-600 flex items-center justify-center">
                   {item.icon}
                 </div>

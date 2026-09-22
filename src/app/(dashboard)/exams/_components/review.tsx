@@ -34,7 +34,7 @@ const params = useSearchParams()
       <h1 className="font-semibold pt-6 mb-4 text-2xl text-blue-600">
         Results:
       </h1>
-      <div className="flex gap-9 items-start">
+      <div className="flex min-w-0 flex-col items-center gap-6 lg:flex-row lg:items-start">
         <div className="flex-shrink-0">
           <ResultsCircle 
             results={{
@@ -47,7 +47,7 @@ const params = useSearchParams()
         </div>
 
         {/* Summary Statistics */}
-        <div className="bg-blue-50 p-6 rounded-lg flex-1">
+        <div className="w-full min-w-0 flex-1 rounded-lg bg-blue-50 p-4 sm:p-6">
           <div className="grid grid-cols-2 gap-4">
             <div>
               <p className="text-gray-600 text-sm mb-1">Total Questions</p>
@@ -81,11 +81,11 @@ const params = useSearchParams()
       <h2 className="font-semibold text-xl text-blue-600 mt-8 mb-4">
         Detailed Review:
       </h2>
-      <div className="overflow-y-scroll w-full p-4 border border-gray-200 rounded-lg max-h-[60vh] scrollbar-track-gray-50 scrollbar-thumb-gray-200 scrollbar space-y-4">
+      <div className="min-w-0 w-full space-y-4 overflow-x-hidden overflow-y-auto rounded-lg border border-gray-200 p-3 max-h-[60vh] scrollbar-track-gray-50 scrollbar-thumb-gray-200 scrollbar sm:p-4">
         {analytics.map((question, index) => (
           <div
             key={question.questionId}
-            className={`p-4 rounded-lg border-2 ${
+              className={`min-w-0 break-words rounded-lg border-2 p-3 sm:p-4 ${
               question.isCorrect ? "border-emerald-200 bg-emerald-50" : "border-red-200 bg-red-50"
             }`}
           >
@@ -133,16 +133,16 @@ const params = useSearchParams()
       </div>
 
       {/* Action Buttons */}
-      <div className="flex font-medium gap-4 mt-8">
+      <div className="mt-8 flex flex-col gap-4 font-medium sm:flex-row">
         <Button
           onClick={() => location.reload()}
           variant={"gray"}
-          className="flex gap-2"
+          className="flex w-full gap-2 sm:w-auto"
         >
           <RotateCcw size={18} />
           Restart
         </Button>
-        <Button onClick={() => router.push(`/exams?diplomaId=${params.get("diplomaId")}&diplomaTitle=${params.get("diplomaTitle")}`)} className="gap-2">
+        <Button onClick={() => router.push(`/exams?diplomaId=${params.get("diplomaId")}&diplomaTitle=${params.get("diplomaTitle")}`)} className="w-full gap-2 sm:w-auto">
           <FolderSearch size={18} />
           Explore
         </Button>

@@ -46,7 +46,7 @@ export default function ExamsComponent() {
       {data.payload.data.map((exam) => (
             <div
               key={exam.id}
-              className="flex gap-4 bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+              className="flex min-w-0 flex-wrap gap-4 rounded-lg border border-gray-200 bg-white p-4 transition-shadow hover:shadow-md sm:flex-nowrap"
             >
               {/* Exam Image/Icon */}
               <div className="relative flex-shrink-0 w-20 h-20 bg-gradient-to-br from-blue-400 to-blue-600 rounded-lg flex items-center justify-center overflow-hidden">
@@ -64,7 +64,7 @@ export default function ExamsComponent() {
               </div>
 
               {/* Exam Content */}
-              <div className="flex-1">
+              <div className="min-w-0 flex-1">
                 <h2
                   className="text-blue-600 text-lg font-semibold hover:underline cursor-pointer mb-1"
                   onClick={() => {
@@ -85,7 +85,7 @@ export default function ExamsComponent() {
               </div>
 
               {/* Exam Info & Action */}
-              <div className="flex flex-col items-end justify-between">
+              <div className="flex w-full flex-row items-center justify-between gap-3 sm:w-auto sm:flex-col sm:items-end">
                 <div className="flex flex-col gap-2 text-right text-sm">
                   <div className="flex items-center gap-1 justify-end">
                     <BookOpen strokeWidth={1.5} className="w-4 h-4 text-gray-500" />

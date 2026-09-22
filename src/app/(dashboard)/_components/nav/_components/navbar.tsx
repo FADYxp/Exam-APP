@@ -19,7 +19,7 @@ export default function Navbar() {
   const segments = pathname.split("/").filter(Boolean);
 
   return (
-    <nav className="p-4 w-full bg-white flex flex-wrap items-center gap-2 text-sm text-gray-400">
+    <nav className="flex w-full min-w-0 flex-wrap items-center gap-2 bg-white p-3 text-xs text-gray-400 sm:p-4 sm:text-sm">
       {/* Home link */}
       <Link href="/" className="hover:text-blue-600">
         Home
@@ -47,7 +47,7 @@ export default function Navbar() {
         }
 
         return (
-          <span key={idx} className="flex items-center gap-2">
+          <span key={idx} className="flex min-w-0 items-center gap-2">
             <span className="text-gray-300">/</span>
             <Link
               href={hrefWithParams}
@@ -57,7 +57,7 @@ export default function Navbar() {
                   : "text-gray-600 hover:text-blue-600 transition-colors"
               }
             >
-              {displayName}
+              <span className="max-w-[14rem] truncate sm:max-w-none">{displayName}</span>
             </Link>
           </span>
         );

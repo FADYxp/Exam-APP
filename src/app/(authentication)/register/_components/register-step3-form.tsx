@@ -67,7 +67,7 @@ export function RegisterStep3Form({ onNext, onBack }: RegisterStep3FormProps) {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           {/* Names */}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <FormField
               control={form.control}
               name="firstName"
@@ -120,7 +120,7 @@ export function RegisterStep3Form({ onNext, onBack }: RegisterStep3FormProps) {
                 <FormLabel>Phone</FormLabel>
                 <div className="grid grid-cols-1 !mt-0">
                   <FormControl>
-                    <div className="flex">
+                    <div className="flex min-w-0">
                       <PhoneInput className="" />
                       <Input
                         className="border-s-0"

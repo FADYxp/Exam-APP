@@ -73,8 +73,8 @@ export default function EmailVerify() {
   };
 
   return (
-    <div className="h-screen flex items-center justify-center">
-      <div className="px-36 w-full">
+    <div className="flex min-h-screen items-center justify-center px-4 py-8 sm:px-8 lg:px-12">
+      <div className="w-full max-w-xl">
         <Header>Verify your Email</Header>
 
         {step === 1 ? (

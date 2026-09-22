@@ -117,7 +117,7 @@ export default function ProfileForm() {
       ) : (
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
-            <div className="grid grid-cols-2 gap-3 ">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               {/* FULL name */}
               <FormField
                 control={form.control}
@@ -183,7 +183,7 @@ export default function ProfileForm() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Phone</FormLabel>
-                  <div className="grid grid-cols-1 !mt-0 ">
+                  <div className="grid min-w-0 grid-cols-1 !mt-0 ">
                     <FormControl>
                       <div className="flex">
                         <PhoneInput className="" />
